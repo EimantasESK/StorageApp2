@@ -17,6 +17,12 @@ namespace StorageApp2
             Price = inPrice;
         }
 
+        override public string ToString()
+        {
+            return "|" + Id + "|" + Name + "|$" + Price;
+            //return ($"|{Id}|{Name}|{Price}\u20AC");
+        }
+
         
     }
 
