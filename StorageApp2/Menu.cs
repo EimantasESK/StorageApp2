@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace StorageApp2
 {
@@ -47,7 +49,24 @@ namespace StorageApp2
                         printInventory(s);
                         Console.WriteLine("Select item number to delete: ");
                         int deleteNum = int.Parse(Console.ReadLine());
-                        s.InventoryList.Remove(s.InventoryList[deleteNum-1]);
+                        s.InventoryList.Remove(s.InventoryList[deleteNum - 1]);
+                        break;
+
+                    case 4:
+                        Console.WriteLine("You choose update item");
+                        Console.WriteLine("Item list:");
+                        printInventory(s);
+                        Console.WriteLine("Select item number to tu update: ");
+                        int updateNum = int.Parse(Console.ReadLine());
+                        Console.WriteLine("Old inventory information:");
+                        Console.WriteLine(s.InventoryList[updateNum-1]);
+                        s.InventoryList.Remove(s.InventoryList[updateNum - 1]);
+                        Console.WriteLine("Add updated item Name: ");
+                        string updateName = Console.ReadLine();
+                        Console.WriteLine("Add updated item Price");
+                        decimal updatePrice = decimal.Parse(Console.ReadLine());
+                        Guid updateID = Guid.NewGuid();
+                        s.InventoryList.Insert(updateNum-1, new Inventory(updateID,updateName,updatePrice));
                         break;
                 }
 
@@ -73,7 +92,7 @@ namespace StorageApp2
         public static int choooseAction()
         {
             int choice = 0;
-            Console.WriteLine("1 - create item\n2 - show all inventory\n3 - delete\n0 - exit");
+            Console.WriteLine("1 - create item\n2 - show all inventory\n3 - delete\n4 - update item\n0 - exit");
             choice = int.Parse(Console.ReadLine());
             return choice;
         }
