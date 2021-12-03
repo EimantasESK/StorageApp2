@@ -4,13 +4,13 @@ using System.Text;
 
 namespace StorageApp2
 {
-    public class Store
+    public class StoreRepository
     {
         public List<Inventory> InventoryList { get; set; }
 
-        public Store()
+        public StoreRepository()
         {
-            InventoryList = new List<Inventory>(); 
+            InventoryList = new List<Inventory>();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StorageApp2.repository;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -10,7 +11,8 @@ namespace StorageApp2
     {
         public void Run()
         {
-            Store s = new Store();
+            StoreRepository s = new StoreRepository();
+            InventoryRepository inventoryRepository = new InventoryRepository();
 
             Console.WriteLine("Store actions:");
 
@@ -25,7 +27,7 @@ namespace StorageApp2
                     case 1:
                         Console.WriteLine("You choose create item");
 
-                        Guid itID = Guid.NewGuid();
+                        //Guid itID = Guid.NewGuid();
                         string itName = "";
                         decimal itPrice = 0;
 
@@ -35,38 +37,42 @@ namespace StorageApp2
                         Console.Write("Item price: ");
                         itPrice = decimal.Parse(Console.ReadLine());
 
-                        Inventory newItem = new Inventory(itID, itName, itPrice);
-                        s.InventoryList.Add(newItem);
+                       inventoryRepository.create(itName, itPrice);
+                        //Inventory newItem = new Inventory(itID, itName, itPrice);
+                        //s.InventoryList.Add(newItem);
                         break;
 
                     case 2:
-                        printInventory(s);
+                        printInventory(inventoryRepository.getAll());
                         break;
 
                     case 3:
                         Console.WriteLine("You choose delete item");
                         Console.WriteLine("Item list:");
-                        printInventory(s);
+                        printInventory(inventoryRepository.getAll());
                         Console.WriteLine("Select item number to delete: ");
                         int deleteNum = int.Parse(Console.ReadLine());
-                        s.InventoryList.Remove(s.InventoryList[deleteNum - 1]);
+                        //s.InventoryList.Remove(s.InventoryList[deleteNum - 1]);
+                        inventoryRepository.delete(deleteNum);
                         break;
 
                     case 4:
                         Console.WriteLine("You choose update item");
                         Console.WriteLine("Item list:");
-                        printInventory(s);
+                        printInventory(inventoryRepository.getAll());
                         Console.WriteLine("Select item number to tu update: ");
                         int updateNum = int.Parse(Console.ReadLine());
-                        Console.WriteLine("Old inventory information:");
-                        Console.WriteLine(s.InventoryList[updateNum-1]);
-                        s.InventoryList.Remove(s.InventoryList[updateNum - 1]);
+                        //Inventory oldItem = inventoryRepository.getAll()[updateNum - 1];
                         Console.WriteLine("Add updated item Name: ");
                         string updateName = Console.ReadLine();
                         Console.WriteLine("Add updated item Price");
                         decimal updatePrice = decimal.Parse(Console.ReadLine());
-                        Guid updateID = Guid.NewGuid();
-                        s.InventoryList.Insert(updateNum-1, new Inventory(updateID,updateName,updatePrice));
+                        //oldItem.Name = updateName;
+                        //oldItem.Price = updatePrice;
+                        //inventoryRepository.getAll()[updateNum - 1] = oldItem;
+                        inventoryRepository.update(updateNum,updateName,updatePrice);
+
+                        
                         break;
                 }
 
@@ -74,7 +80,7 @@ namespace StorageApp2
             }
         }
         
-        private static void printInventory(Store z)
+        private static void printInventory(List<Inventory> z)
         {
             /*
             foreach (Inventory item in z.InventoryList)
@@ -83,9 +89,9 @@ namespace StorageApp2
             }
             */
             
-            for (int i = 0; i < z.InventoryList.Count; i++)
+            for (int i = 0; i < z.Count; i++)
             {
-                Console.WriteLine("#" + (i +1) + " " + z.InventoryList[i]);
+                Console.WriteLine("#" + (i +1) + " " + z[i]);
             }
         }
 
