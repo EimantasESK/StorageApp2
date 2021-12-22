@@ -11,32 +11,31 @@ namespace StorageApp2.repository
 {
     public class InventoryRepository
     {
-        StoreRepository s = new StoreRepository();
+        StoreRepository storeRep = new StoreRepository();
 
         public void Create(string name, decimal price)
         {
-            //Guid itID = Guid.NewGuid();
-            //Inventory newItem = new Inventory(itID, name, price);
-            //s.InventoryList.Add(newItem);
-            Guid itID = Guid.NewGuid();
-            s.InventoryList.Add(new Inventory() {Id = itID, Name = name, Price = price});
-           
+            Inventory newItem = new Inventory(name, price);
+            storeRep.InventoryList.Add(newItem);
+
+            //storeRep.InventoryList.Add(new Inventory() { Name = name, Price = price });
         }
+
         public List<Inventory> GetAll()
         {
-            return s.InventoryList;
+            return storeRep.InventoryList;
         }
         public List<Inventory> GetAllShop()
         {
-            return s.ShopingList;
+            return storeRep.ShopingList;
         }
         public void Delete(Guid id)
         {
-            s.InventoryList.Remove(s.InventoryList.First(i => i.Id == id));
+            storeRep.InventoryList.Remove(storeRep.InventoryList.SingleOrDefault(i => i.Id == id));
         }
         public void Update(Guid id, string name, decimal price)
         {
-            Inventory oldItem = s.InventoryList.First(i => i.Id == id);
+            Inventory oldItem = storeRep.InventoryList.SingleOrDefault(i => i.Id == id);
             oldItem.Name = name;
             oldItem.Price = price;
         }
@@ -44,8 +43,8 @@ namespace StorageApp2.repository
         {
             FileStream stream = new FileStream("Inventory.xml", FileMode.Create);
             //new XmlSerializer(typeof(StoreRepository)).Serialize(stream, s);
-            XmlSerializer x = new XmlSerializer(s.GetType());
-            x.Serialize(stream, s);
+            XmlSerializer x = new XmlSerializer(storeRep.GetType());
+            x.Serialize(stream, storeRep);
             stream.Close();
         }
         public void Deserialize()
@@ -54,19 +53,19 @@ namespace StorageApp2.repository
             XmlSerializer des = new XmlSerializer(typeof(StoreRepository));
             using (XmlReader reader = XmlReader.Create(stream))
             {
-                s = (StoreRepository)des.Deserialize(reader);
+                storeRep = (StoreRepository)des.Deserialize(reader);
             }
             stream.Close();
         }
         public void ShopingCart(int index)
         {
-            s.ShopingList.Add(s.InventoryList[index - 1]);
+            storeRep.ShopingList.Add(storeRep.InventoryList[index - 1]);
         }
         public decimal TotalCost()
         {
             decimal totalCost = 0;
 
-            foreach (var c in s.ShopingList)
+            foreach (var c in storeRep.ShopingList)
             {
                 totalCost += c.Price;
             }
@@ -75,26 +74,26 @@ namespace StorageApp2.repository
         }
         public void DeleteShopItem(int index)
         {
-            s.ShopingList.Remove(s.ShopingList[index - 1]);
+            storeRep.ShopingList.Remove(storeRep.ShopingList[index - 1]);
         }
         public void BuyItem()
         {
-            s.InventoryList = s.InventoryList.Except(s.ShopingList).ToList();
-            s.ShopingList.Clear();
+            storeRep.InventoryList = storeRep.InventoryList.Except(storeRep.ShopingList).ToList();
+            storeRep.ShopingList.Clear();
         }
         public void OrderByName()
         {
-            List<Inventory> orderName = s.InventoryList.OrderBy(n => n.Name).ToList();
+            List<Inventory> orderName = storeRep.InventoryList.OrderBy(n => n.Name).ToList();
             orderName.ForEach(n => Console.WriteLine(n));
         }
         public void OrderByPrice()
         {
-            List<Inventory> orderByPrice = s.InventoryList.OrderBy(p => p.Price).ToList();
+            List<Inventory> orderByPrice = storeRep.InventoryList.OrderBy(p => p.Price).ToList();
             orderByPrice.ForEach(p => Console.WriteLine(p));
         }
         public void FindPartByName(string word)
         {
-            var findName = s.InventoryList.FindAll(x => x.Name.StartsWith(word)).ToList();
+            var findName = storeRep.InventoryList.FindAll(x => x.Name.StartsWith(word)).ToList();
             findName.ForEach(f => Console.WriteLine(f));
         }
     }

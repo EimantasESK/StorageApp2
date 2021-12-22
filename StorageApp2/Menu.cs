@@ -10,15 +10,14 @@ namespace StorageApp2
 {
     class Menu
     {
+        InventoryRepository inventoryRepository = new InventoryRepository();
         public void Run()
         {
-            
-            InventoryRepository inventoryRepository = new InventoryRepository();
             inventoryRepository.Deserialize();
 
             Console.WriteLine("Store actions:");
 
-            int action = choooseAction();
+            int action = ChoooseAction();
 
             while (action != 0)
             {
@@ -27,134 +26,53 @@ namespace StorageApp2
                 switch (action)
                 {
                     case 1:
-                        Console.WriteLine("You choose create item");
-
-                        string itName = "";
-                        decimal itPrice = 0;
-
-                        Console.Write("Item name: ");
-                        itName = Console.ReadLine().ToLower();
-
-                        Console.Write("Item price: ");
-                        itPrice = decimal.Parse(Console.ReadLine());
-                        inventoryRepository.Create(itName, itPrice);
-                        inventoryRepository.Save();
+                        CreateItem();
                         break;
 
                     case 2:
-                        printInventory(inventoryRepository.GetAll());
+                        PrintInventory();
                         break;
 
                     case 3:
-                        Console.WriteLine("You choose delete item");
-                        Console.WriteLine("Item list:");
-                        printInventory(inventoryRepository.GetAll());
-                        Console.WriteLine("Enter item id to delete: ");
-                        Guid deleteNum = Guid.Parse(Console.ReadLine());
-                        inventoryRepository.Delete(deleteNum);
-                        inventoryRepository.Save();
+                        DeleteItem();
                         break;
 
                     case 4:
-                        Console.WriteLine("You choose update item");
-                        Console.WriteLine("Item list:");
-                        printInventory(inventoryRepository.GetAll());
-                        Console.WriteLine("Enter item id to update: ");
-                        Guid updateNum = Guid.Parse(Console.ReadLine());
-                        Console.WriteLine("Add updated item Name: ");
-                        string updateName = Console.ReadLine();
-                        Console.WriteLine("Add updated item Price");
-                        decimal updatePrice = decimal.Parse(Console.ReadLine());
-                        inventoryRepository.Update(updateNum, updateName, updatePrice);
-                        inventoryRepository.Save();
+                        UpdateItem();
                         break;
 
                     case 5:
-                        Console.WriteLine("You choose to add inventory to shopping cart");
-                        Console.WriteLine("Item list:");
-                        printInventory(inventoryRepository.GetAll());
-                        Console.WriteLine("Select item number you want to buy:");
-                        int cartChosen = int.Parse(Console.ReadLine());
-                        inventoryRepository.ShopingCart(cartChosen);
-                        Console.WriteLine("Your shopping list:");
-                        printInventory(inventoryRepository.GetAllShop());
-                        Console.Write("Total price: ${0}\n", inventoryRepository.TotalCost());
-                        Console.WriteLine("Item added to chart!");
+                        AddShopCart();
                         break;
 
                     case 6:
-                        Console.WriteLine("You choose to show inventory to shopping cart:");
-                        printInventory(inventoryRepository.GetAllShop());
-                        Console.Write("Total price: ${0}\n", inventoryRepository.TotalCost());
+                        ShowShopCart();
                         break;
 
                     case 7:
-                        Console.WriteLine("You choose delete item form shopping cart");
-                        Console.WriteLine("Item list:");
-                        printInventory(inventoryRepository.GetAllShop());
-                        Console.WriteLine("Select item number to delete: ");
-                        int deleteItem = int.Parse(Console.ReadLine());
-                        inventoryRepository.DeleteShopItem(deleteItem);
+                        DeleteFromShopCart();
                         break;
 
                     case 8:
-                        Console.WriteLine("You choose buy item(s)");
-                        Console.WriteLine("Item list:");
-                        printInventory(inventoryRepository.GetAllShop());
-                        Console.Write("Total price: ${0}\n", inventoryRepository.TotalCost());
-                        Console.WriteLine("Thank you for buying from us! ");
-                        inventoryRepository.BuyItem();
-                        inventoryRepository.Save();
+                        BuyItems();
                         break;
 
                     case 9:
-                        Console.WriteLine("You choose order items");
-                        Console.WriteLine("We have two options:\nPress \"N\" to order by name\nPress \"P\" to order by price ");
-                        char orderChoice = char.Parse(Console.ReadLine().Trim().ToLower());
-
-                        if (orderChoice == 'n')
-                        {
-                            inventoryRepository.OrderByName();
-                        }
-                        else if(orderChoice == 'p')
-                        {
-                            inventoryRepository.OrderByPrice();
-                        }
-                        else
-                        {
-                            Console.WriteLine("Ups something wrong please try again");
-                        }
+                        OrderItems();
                         break;
 
                     case 10:
-                        Console.WriteLine("You choose find item");
-                        Console.WriteLine("Please enter item name or first letter:");
-                        string findWord = Console.ReadLine().ToLower();
-                        inventoryRepository.FindPartByName(findWord);
+                        FindItem();
                         break;
 
                     default:
                         break;
                 }
 
-                action = choooseAction();
+                action = ChoooseAction();
             }
         }
-
-        private static void printInventory(List<Inventory> z)
-        {
-            //foreach (Inventory item in z.InventoryList)
-            //{
-            //    Console.WriteLine("{0} | {1} | {2}", item.Id, item.Name, item.Price);
-            //}
-
-            for (int i = 0; i < z.Count; i++)
-            {
-                Console.WriteLine("#" + (i + 1) + " " + z[i]);
-            }
-        }
-
-        public static int choooseAction()
+        public static int ChoooseAction()
         {
             int choice = 0;
             Console.WriteLine("1 - create item\n2 - show all inventory\n3 - delete" +
@@ -163,6 +81,129 @@ namespace StorageApp2
                             "\n8 - buy\n9 - order item\n10 - find item by name\n0 - exit");
             choice = int.Parse(Console.ReadLine());
             return choice;
+        }
+        public void CreateItem()
+        {
+            Console.WriteLine("You choose create item");
+            //string itName = "";
+            //decimal itPrice = 0;
+            Console.Write("Item name: ");
+            string itName = Console.ReadLine().ToLower();
+            Console.Write("Item price: ");
+            decimal itPrice = decimal.Parse(Console.ReadLine());
+            inventoryRepository.Create(itName, itPrice);
+            inventoryRepository.Save();
+        }
+        public void PrintInventory()
+        {
+            List<Inventory> items = inventoryRepository.GetAll();
+
+            //foreach (Inventory item in items)
+            //{
+            //    Console.WriteLine("{0} | {1} | {2}", item.Id, item.Name, item.Price);
+            //}
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                Console.WriteLine("#" + (i + 1) + " " + items[i]);
+            }
+        }
+        public void PrintShopCart()
+        {
+            List<Inventory> items = inventoryRepository.GetAllShop();
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                Console.WriteLine("#" + (i + 1) + " " + items[i]);
+            }
+        }
+        public void DeleteItem()
+        {
+            Console.WriteLine("You choose delete item");
+            Console.WriteLine("Item list:");
+            PrintInventory();
+            Console.WriteLine("Enter item id to delete: ");
+            Guid deleteNum = Guid.Parse(Console.ReadLine());
+            inventoryRepository.Delete(deleteNum);
+            inventoryRepository.Save();
+        }
+        public void UpdateItem()
+        {
+            Console.WriteLine("You choose update item");
+            Console.WriteLine("Item list:");
+            PrintInventory();
+            Console.WriteLine("Enter item id to update: ");
+            Guid updateNum = Guid.Parse(Console.ReadLine());
+            Console.WriteLine("Add updated item Name: ");
+            string updateName = Console.ReadLine();
+            Console.WriteLine("Add updated item Price");
+            decimal updatePrice = decimal.Parse(Console.ReadLine());
+            inventoryRepository.Update(updateNum, updateName, updatePrice);
+            inventoryRepository.Save();
+        }
+       public void AddShopCart()
+        {
+            Console.WriteLine("You choose to add inventory to shopping cart");
+            Console.WriteLine("Item list:");
+            PrintInventory();
+            Console.WriteLine("Select item number you want to buy:");
+            int cartChosen = int.Parse(Console.ReadLine());
+            inventoryRepository.ShopingCart(cartChosen);
+            Console.WriteLine("Your shopping list:");
+            PrintShopCart();
+            Console.Write("Total price: ${0}\n", inventoryRepository.TotalCost());
+            Console.WriteLine("Item added to chart!");
+        }
+        public void ShowShopCart()
+        {
+            Console.WriteLine("You choose to show inventory to shopping cart:");
+            PrintShopCart();
+            Console.Write("Total price: ${0}\n", inventoryRepository.TotalCost());
+        }
+       public void DeleteFromShopCart()
+        {
+            Console.WriteLine("You choose delete item form shopping cart");
+            Console.WriteLine("Item list:");
+            PrintShopCart();
+            Console.WriteLine("Select item number to delete: ");
+            int deleteItem = int.Parse(Console.ReadLine());
+            inventoryRepository.DeleteShopItem(deleteItem);
+        }
+        public void BuyItems()
+        {
+            Console.WriteLine("You choose buy item(s)");
+            Console.WriteLine("Item list:");
+            PrintShopCart();
+            Console.Write("Total price: ${0}\n", inventoryRepository.TotalCost());
+            Console.WriteLine("Thank you for buying from us! ");
+            inventoryRepository.BuyItem();
+            inventoryRepository.Save();
+        }
+        public void OrderItems()
+        {
+            Console.WriteLine("You choose order items");
+            Console.WriteLine("We have two options:\nPress \"N\" to order by name\nPress \"P\" to order by price ");
+            char orderChoice = char.Parse(Console.ReadLine().Trim().ToLower());
+
+            if (orderChoice == 'n')
+            {
+                inventoryRepository.OrderByName();
+            }
+            else if (orderChoice == 'p')
+            {
+                inventoryRepository.OrderByPrice();
+            }
+            else
+            {
+                Console.WriteLine("Ups something wrong please try again");
+            }
+        }
+        public void FindItem()
+        {
+            Console.WriteLine("You choose find item");
+            Console.WriteLine("Please enter item name or first letter:");
+            string findWord = Console.ReadLine().ToLower();
+            inventoryRepository.FindPartByName(findWord);
         }
     }
 }
