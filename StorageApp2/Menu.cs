@@ -1,6 +1,8 @@
 ﻿using StorageApp2.repository;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -11,10 +13,10 @@ namespace StorageApp2
     class Menu
     {
         InventoryRepository inventoryRepository = new InventoryRepository();
+        const string conString = "Server=.;Trusted_Connection=True;Initial catalog=StoreApp2";
+
         public void Run()
         {
-            inventoryRepository.Deserialize();
-
             Console.WriteLine("Store actions:");
 
             int action = ChoooseAction();
@@ -27,18 +29,22 @@ namespace StorageApp2
                 {
                     case 1:
                         CreateItem();
+                        //CreateItemSql();
                         break;
 
                     case 2:
                         PrintInventory();
+                        //PrintInventorySql();
                         break;
 
                     case 3:
                         DeleteItem();
+                        //DeleteItemSql();
                         break;
 
                     case 4:
                         UpdateItem();
+                        //UpdateItemSql();
                         break;
 
                     case 5:
@@ -85,23 +91,15 @@ namespace StorageApp2
         public void CreateItem()
         {
             Console.WriteLine("You choose create item");
-            //string itName = "";
-            //decimal itPrice = 0;
             Console.Write("Item name: ");
             string itName = Console.ReadLine().ToLower();
             Console.Write("Item price: ");
             decimal itPrice = decimal.Parse(Console.ReadLine());
             inventoryRepository.Create(itName, itPrice);
-            inventoryRepository.Save();
         }
         public void PrintInventory()
         {
             List<Inventory> items = inventoryRepository.GetAll();
-
-            //foreach (Inventory item in items)
-            //{
-            //    Console.WriteLine("{0} | {1} | {2}", item.Id, item.Name, item.Price);
-            //}
 
             for (int i = 0; i < items.Count; i++)
             {
@@ -125,7 +123,6 @@ namespace StorageApp2
             Console.WriteLine("Enter item id to delete: ");
             Guid deleteNum = Guid.Parse(Console.ReadLine());
             inventoryRepository.Delete(deleteNum);
-            inventoryRepository.Save();
         }
         public void UpdateItem()
         {
@@ -139,7 +136,6 @@ namespace StorageApp2
             Console.WriteLine("Add updated item Price");
             decimal updatePrice = decimal.Parse(Console.ReadLine());
             inventoryRepository.Update(updateNum, updateName, updatePrice);
-            inventoryRepository.Save();
         }
        public void AddShopCart()
         {
@@ -177,7 +173,6 @@ namespace StorageApp2
             Console.Write("Total price: ${0}\n", inventoryRepository.TotalCost());
             Console.WriteLine("Thank you for buying from us! ");
             inventoryRepository.BuyItem();
-            inventoryRepository.Save();
         }
         public void OrderItems()
         {
@@ -204,6 +199,125 @@ namespace StorageApp2
             Console.WriteLine("Please enter item name or first letter:");
             string findWord = Console.ReadLine().ToLower();
             inventoryRepository.FindPartByName(findWord);
+        }
+        public static void CreateItemSql()
+        {
+            Console.WriteLine("You choose create item");
+            Console.Write("Item name: ");
+            string itName = Console.ReadLine().ToLower();
+            Console.Write("Item price: ");
+            decimal itPrice = decimal.Parse(Console.ReadLine());
+            
+            string sqlStatement = $"insert into InventoryList(NAME,PRICE) values ('{itName}',{itPrice})";
+            SqlConnection sqlConnection = new SqlConnection(conString);
+            try
+            {
+                if (sqlConnection.State == ConnectionState.Closed)
+                {
+                    sqlConnection.Open();
+                }
+                SqlCommand sqlCommand = new SqlCommand(sqlStatement, sqlConnection);
+                sqlCommand.ExecuteNonQuery();
+                Console.WriteLine("Added to Invenotry list");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                sqlConnection.Close();
+            }
+            
+        }
+        private void PrintInventorySql()
+        {
+            string sqlStatement = "select * from InventoryList";
+            SqlConnection sqlConnection = new SqlConnection(conString);
+            try
+            {
+                if (sqlConnection.State == ConnectionState.Closed)
+                {
+                    sqlConnection.Open();
+                }
+                SqlCommand sqlCommand = new SqlCommand(sqlStatement, sqlConnection);
+                SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+                while (sqlDataReader.Read())
+                {
+                    Console.WriteLine($"{sqlDataReader.GetGuid(0)} | {sqlDataReader.GetString(1)} | {sqlDataReader.GetDecimal(2)}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                sqlConnection.Close();
+            }
+        }
+        private void DeleteItemSql()
+        {
+            Console.WriteLine("You choose delete item");
+            Console.WriteLine("Item list:");
+            PrintInventorySql();
+            Console.WriteLine("Enter item id to delete: ");
+            Guid deleteNum = Guid.Parse(Console.ReadLine());
+
+            string sqlStatement = $"delete from InventoryList where ID = '{deleteNum}'";
+            SqlConnection sqlConnection = new SqlConnection(conString);
+            try
+            {
+                if (sqlConnection.State == ConnectionState.Closed)
+                {
+                    sqlConnection.Open();
+                }
+                SqlCommand sqlCommand = new SqlCommand(sqlStatement, sqlConnection);
+                sqlCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                sqlConnection.Close();
+            }
+        }
+        private void UpdateItemSql()
+        {
+            Console.WriteLine("You choose update item");
+            Console.WriteLine("Item list:");
+            PrintInventorySql();
+            Console.WriteLine("Enter item id to update: ");
+            Guid updateNum = Guid.Parse(Console.ReadLine());
+            Console.WriteLine("Add updated item Name: ");
+            string updateName = Console.ReadLine();
+            Console.WriteLine("Add updated item Price");
+            decimal updatePrice = decimal.Parse(Console.ReadLine());
+
+            SqlConnection sqlConnection = new SqlConnection(conString);
+            string sqlStatement = $"update InventoryList set NAME = '{updateName}' where ID = '{updateNum}'";
+            string sqlStatement2 = $"update InventoryList set PRICE = '{updatePrice}' where ID = '{updateNum}'";
+            try
+            {
+                if (sqlConnection.State == ConnectionState.Closed)
+                {
+                    sqlConnection.Open();
+                }
+                SqlCommand sqlCommand = new SqlCommand(sqlStatement,sqlConnection);
+                SqlCommand sqlCommand2 = new SqlCommand(sqlStatement2,sqlConnection);
+                sqlCommand.ExecuteNonQuery();
+                sqlCommand2.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                sqlConnection.Close();
+            }
         }
     }
 }

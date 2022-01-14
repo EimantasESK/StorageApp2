@@ -17,7 +17,7 @@ namespace StorageApp2.repository
         {
             Inventory newItem = new Inventory(name, price);
             storeRep.InventoryList.Add(newItem);
-
+            storeRep.SaveInventoryList();
             //storeRep.InventoryList.Add(new Inventory() { Name = name, Price = price });
         }
 
@@ -27,45 +27,29 @@ namespace StorageApp2.repository
         }
         public List<Inventory> GetAllShop()
         {
-            return storeRep.ShopingList;
+            return storeRep.ShoppingList;
         }
         public void Delete(Guid id)
         {
             storeRep.InventoryList.Remove(storeRep.InventoryList.SingleOrDefault(i => i.Id == id));
+            storeRep.SaveInventoryList();
         }
         public void Update(Guid id, string name, decimal price)
         {
             Inventory oldItem = storeRep.InventoryList.SingleOrDefault(i => i.Id == id);
             oldItem.Name = name;
             oldItem.Price = price;
-        }
-        public void Save()
-        {
-            FileStream stream = new FileStream("Inventory.xml", FileMode.Create);
-            //new XmlSerializer(typeof(StoreRepository)).Serialize(stream, s);
-            XmlSerializer x = new XmlSerializer(storeRep.GetType());
-            x.Serialize(stream, storeRep);
-            stream.Close();
-        }
-        public void Deserialize()
-        {
-            FileStream stream = new FileStream("Inventory.xml", FileMode.Open);
-            XmlSerializer des = new XmlSerializer(typeof(StoreRepository));
-            using (XmlReader reader = XmlReader.Create(stream))
-            {
-                storeRep = (StoreRepository)des.Deserialize(reader);
-            }
-            stream.Close();
+            storeRep.SaveInventoryList();
         }
         public void ShopingCart(int index)
         {
-            storeRep.ShopingList.Add(storeRep.InventoryList[index - 1]);
+            storeRep.ShoppingList.Add(storeRep.InventoryList[index - 1]);
         }
         public decimal TotalCost()
         {
             decimal totalCost = 0;
 
-            foreach (var c in storeRep.ShopingList)
+            foreach (var c in storeRep.ShoppingList)
             {
                 totalCost += c.Price;
             }
@@ -74,12 +58,14 @@ namespace StorageApp2.repository
         }
         public void DeleteShopItem(int index)
         {
-            storeRep.ShopingList.Remove(storeRep.ShopingList[index - 1]);
+            storeRep.ShoppingList.Remove(storeRep.ShoppingList[index - 1]);
         }
         public void BuyItem()
         {
-            storeRep.InventoryList = storeRep.InventoryList.Except(storeRep.ShopingList).ToList();
-            storeRep.ShopingList.Clear();
+            storeRep.InventoryList = storeRep.InventoryList.Except(storeRep.ShoppingList).ToList();
+            storeRep.SaveInventoryList();
+            storeRep.SaveShoppingList();
+            storeRep.ShoppingList.Clear();
         }
         public void OrderByName()
         {
